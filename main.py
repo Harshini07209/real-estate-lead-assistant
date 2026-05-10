@@ -27,7 +27,11 @@ class Lead(BaseModel):
     phone: str
     property: str
 
-# home
+# status update model
+class StatusUpdate(BaseModel):
+    status: str
+
+# home route
 @app.get("/")
 def home():
     return {"message": "API is working"}
@@ -48,7 +52,7 @@ def add_lead(lead: Lead):
 
     return {"message": "Lead added"}
 
-# get leads
+# get all leads
 @app.get("/leads")
 def get_leads():
     conn = sqlite3.connect("test.db")
@@ -60,9 +64,8 @@ def get_leads():
     conn.close()
 
     return data
-class StatusUpdate(BaseModel):
-    status: str
 
+# update lead status
 @app.put("/update-status/{lead_id}")
 def update_status(lead_id: int, data: StatusUpdate):
     conn = sqlite3.connect("test.db")
@@ -77,3 +80,26 @@ def update_status(lead_id: int, data: StatusUpdate):
     conn.close()
 
     return {"message": "Status updated"}
+
+@app.get("/search")
+def search_leads(name: str = "", status: str = ""):
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM leads WHERE 1=1"
+    params = []
+
+    if name:
+        query += " AND name LIKE ?"
+        params.append(f"%{name}%")
+
+    if status:
+        query += " AND status = ?"
+        params.append(status)
+
+    cursor.execute(query, params)
+    data = cursor.fetchall()
+
+    conn.close()
+
+    return data
