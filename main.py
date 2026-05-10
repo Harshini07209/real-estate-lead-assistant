@@ -103,3 +103,18 @@ def search_leads(name: str = "", status: str = ""):
     conn.close()
 
     return data
+
+@app.delete("/delete-lead/{lead_id}")
+def delete_lead(lead_id: int):
+    conn = sqlite3.connect("test.db")
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM leads WHERE id = ?",
+        (lead_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return {"message": "Lead deleted"}
